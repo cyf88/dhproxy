@@ -1,0 +1,13 @@
+
+1.
+    Build From http://dhcpserver.sourceforge.net/
+
+2. start
+    opendhcpd -v
+
+3.
+    This program uses 2 or 3 helper files:-
+    i)   -i[inifile], where configuration settings can be specified,
+         default is ./etc/opendhcpd.ini
+    ii)  -s[statefile] saves current leases, default is /etc/opendhcpd.state
+    iii) -l[logfile] dumps log to this file in daemon mode, default is syslog
