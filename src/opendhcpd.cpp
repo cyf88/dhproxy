@@ -208,7 +208,7 @@ const data4 opData[] =
 
         {"CERT", 224, 1, 1},
         {"FIRMWARE", 225, 1, 1},
-        {"35114Server", 150, 1, 1}
+        {"Server35114", 223, 1, 1}
 
     };
 
@@ -1081,9 +1081,18 @@ MYDWORD resad(data9 *req)
 	MYDWORD maxRange = 0;
 
     //cyf auth ro radius server
-    if (req->authOption.size > 0) {
-        if (!execRadclient("cyf", "886622", "192.168.200.103")) {
+    if (req->authOption.size > 0 && cfig.radiusConn.radiusServerIP) {
+
+        if (!execRadclient(IP2String(tempbuff, cfig.radiusConn.radiusServerIP),
+                           cfig.radiusConn.userName,  cfig.radiusConn.password,
+                           "text123456", "signText")) {
+            sprintf(logBuff, "radius server reject ");
+            logDHCPMess(logBuff, 1);
+            req->authFlag = false;
             return 0;
+        } else {
+            //TODO 验证通过逻辑
+            req->authFlag = true;
         }
     }
 
@@ -1885,6 +1894,15 @@ void pvdata(data9 *req, data3 *op)
                 req->firmwareOption.opt_code = op->opt_code;
                 req->firmwareOption.size = op->size;
                 memcpy(req->firmwareOption.value, op->value, op->size);
+            }
+            else if (op->opt_code == DHCP_OPTION_35114_SERVER)
+            {
+                //35114_SERVER 地址需要验证通过才会提供
+                if (req->authFlag && req->authOption.size > 0) {
+                    req->server35114Option.opt_code = op->opt_code;
+                    req->server35114Option.size = op->size;
+                    memcpy(req->server35114Option.value, op->value, op->size);
+                }
             }
 
 			MYWORD tsize = op->size + 2;
@@ -5554,13 +5572,17 @@ data7 *createCache(data71 *lump)
 
 
 
-bool execRadclient(std::string username, std::string chapPasswd, std::string serverAddr) {
+bool execRadclient(std::string serverAddr, std::string username,
+                   std::string chapPasswd, std::string text,
+                   std::string sign) {
     // 构建要执行的命令
    // std::string cmd = "echo 'User-Name = \"cyf\"\nCHAP-Password = \"886622\"' | radclient -x localhost auth testing123";
-    std::string cmd = "echo 'User-Name = \"" +
-            username + "\"\nCHAP-Password = \"" +
-            chapPasswd + "\"' | radclient -x " +
-            serverAddr + " auth testing123";
+    std::string cmd = "echo 'User-Name = \"" + username
+            + "\"\nTri-Text = \"" + text
+            + "\"\nTri-Sign = \"" + sign
+            + "\"\nCHAP-Password = \"" + chapPasswd
+            + "\"' | radclient -x " + serverAddr
+            + " auth testing123";
 
     // 打开管道并执行命令
     std::array<char, 128> buffer;

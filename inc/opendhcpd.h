@@ -278,7 +278,7 @@ struct ConnType
 //cyf
 #define DHCP_OPTION_CERT_PROXY              224
 #define DHCP_OPTION_FIRMWARE_PROXY          225
-#define DHCP_OPTION_35114_SERVER			150
+#define DHCP_OPTION_35114_SERVER			223
 
 //#define DHCP_VENDORDATA_SIZE		 272
 //#define DHCP_VENDORDATA_SIZE		 64
@@ -454,8 +454,10 @@ struct data9 //dhcpRequst
 	data3 vendClass;
 	data3 userClass;
     data3 authOption;
+    bool authFlag;
     data3 certOption;
     data3 firmwareOption;
+    data3 server35114Option;
 	MYDWORD subnetIP;
 	MYDWORD targetIP;
 	MYDWORD rebind;
@@ -613,5 +615,6 @@ MYWORD gdmess(data9*, MYBYTE);
 MYWORD myTokenize(char*, char*, const char*, bool);
 MYWORD pQu(char*, char*);
 MYWORD qLen(char*);
-bool execRadclient(std::string username, std::string chapPasswd, std::string serverAddr);
+bool execRadclient(std::string serverAddr, std::string username, std::string chapPasswd,
+                   std::string text, std::string sign);
 
