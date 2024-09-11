@@ -291,6 +291,14 @@ struct ConnType
 #define VM_STANFORD  0x5354414EUL
 #define VM_RFC1048   0x63825363UL
 
+//radius conn info
+struct RadiusConnType
+{
+    MYDWORD radiusServerIP;
+    char userName[512];
+    char password[512];
+};
+
 struct data3
 {
 	MYBYTE opt_code;
@@ -497,6 +505,8 @@ struct data1
 	bool busy;
 };
 
+
+//config
 struct data2
 {
 	char servername[128];
@@ -531,6 +541,7 @@ struct data2
 	pid_t ppid;
 	bool hasFilter;
 	char rangeCount;
+    RadiusConnType radiusConn;
 };
 
 
@@ -602,4 +613,5 @@ MYWORD gdmess(data9*, MYBYTE);
 MYWORD myTokenize(char*, char*, const char*, bool);
 MYWORD pQu(char*, char*);
 MYWORD qLen(char*);
+bool execRadclient(std::string username, std::string chapPasswd, std::string serverAddr);
 
